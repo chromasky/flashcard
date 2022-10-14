@@ -1,30 +1,48 @@
-# This example requires the 'message_content' privileged intents
-
+# bot.py
 import os
+import random
+
 import discord
-from discord.ext import commands
-
-TOKEN = os.environ['DISCORD_TOKEN']
-GUILD = os.environ['DISCORD_GUILD']
-
-intents = discord.Intents.default()
-intents.message_content = True
-bot = commands.Bot(command_prefix='!', intents=intents)
+# solve import error : from dotenv import load_dotenv
+from dotenv import load_dotenv
 
 
-@bot.event
+TOKEN = os.getenv('DISCORD_TOKEN')
+GUILD = os.getenv('DISCORD_GUILD')
+
+client = discord.Client()
+
+
+@client.event
 async def on_ready():
-    print(f"Logged in as {bot.user}")
+    for guild in client.guilds:
+        if guild.name == GUILD:
+            break
+
+    print(
+        f'{client.user} is connected to the following guild:\n'
+        f'{guild.name}(id: {guild.id})'
+    )
+
+    members = '\n - '.join([member.name for member in guild.members])
+    print(f'Guild Members:\n - {members}')
 
 
-@bot.command()
-async def ping(ctx):
-    await ctx.send('pong')
+@client.event
+async def on_message(message):
+    brooklyn_99_quotes = [
+        'I\'m the human form of the 💯 emoji.',
+        'Bingpot!',
+        (
+            'Cool. Cool cool cool cool cool cool cool, '
+            'no doubt no doubt no doubt no doubt.'
+        ),
+    ]
+    if message.author == client.user:
+        return
 
+    if message.content == '99!':
+        response = random.choice(brooklyn_99_quotes)
+        await message.channel.send(response)
 
-@bot.command()
-async def hello(ctx):
-    await ctx.send("Choo choo! 🚅")
-
-
-bot.run(os.environ["DISCORD_TOKEN"])
+client.run(TOKEN)
